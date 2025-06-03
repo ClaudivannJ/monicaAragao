@@ -1,0 +1,43 @@
+.recommendation-section {
+    margin-bottom: 2.5rem;
+  }
+  
+  .section-title {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .perfect-badge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+  
+  .alt-badge {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .no-results .btn {
+    margin-top: 1rem;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+  }
+ 

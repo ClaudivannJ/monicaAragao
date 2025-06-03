@@ -1,0 +1,171 @@
+// DOM Elements
+const assistantButton = document.getElementById('assistantButton');
+const assistantModal = document.getElementById('assistantModal');
+const closeModal = document.querySelector('.close-modal');
+const startSearchBtn = document.getElementById('startSearch');
+const questionsSection = document.getElementById('questions');
+const matchPercentageSection = document.getElementById('matchPercentage');
+const resultsSection = document.getElementById('results');
+const percentageSlider = document.getElementById('percentageSlider');
+const percentageValue = document.getElementById('percentageValue');
+const restartButton = document.getElementById('restartChat');
+const productsGrid = document.getElementById('productsGrid');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+const closeMenuBtn = document.getElementById('closeMenuBtn');
+const categoryList = document.getElementById('categoryList');
+const chatMessages = document.getElementById('chatMessages');
+
+// Typing animation function
+function showTypingAnimation() {
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  chatMessages.appendChild(typing);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return typing;
+}
+
+function removeTypingAnimation(typing) {
+  typing.remove();
+}
+
+function addMessage(text, isAssistant = true, delay = 1000) {
+  return new Promise(resolve => {
+      const typing = showTypingAnimation();
+      
+      setTimeout(() => {
+          removeTypingAnimation(typing);
+          
+          const message = document.createElement('div');
+          message.className = `message ${isAssistant ? 'assistant' : 'user'}`;
+          message.innerHTML = `<p>${text}</p>`;
+          chatMessages.appendChild(message);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+          resolve();
+      }, delay);
+  });
+}
+
+// Mobile Menu Functions
+function initializeMobileMenu() {
+  const categories = [...new Set(products.map(product => product.type))];
+  categoryList.innerHTML = categories.map(category => `
+      <li class="category-item" data-category="${category}">
+          ${category.charAt(0).toUpperCase() + category.slice(1)}s
+      </li>
+  `).join('');
+
+  // Event Listeners for mobile menu
+  mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.add('active');
+  });
+
+  closeMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.remove('active');
+  });
+
+  categoryList.addEventListener('click', (e) => {
+      const categoryItem = e.target.closest('.category-item');
+      if (categoryItem) {
+          const category = categoryItem.dataset.category;
+          currentCategory = category;
+          
+          // Update active state
+          document.querySelectorAll('.category-item').forEach(item => {
+              item.classList.remove('active');
+          });
+          categoryItem.classList.add('active');
+
+          // Update display
+          displayCatalog(category);
+          
+          // Close menu
+          mobileMenu.classList.remove('active');
+      }
+  });
+}
+
+// Event Listeners
+assistantButton.addEventListener('click', async () => {
+  assistantModal.classList.add('active');
+  chatMessages.innerHTML = '';
+  await addMessage('Olá! Sou a Julia, sua consultora virtual de joias. 💎');
+  await addMessage('Vou te ajudar a encontrar a joia perfeita que combine com seu estilo e ocasião.');
+});
+
+closeModal.addEventListener('click', () => {
+  assistantModal.classList.remove('active');
+});
+
+startSearchBtn.addEventListener('click', async () => {
+  startSearchBtn.classList.add('hidden');
+  await addMessage('Vamos começar nossa busca! Preciso fazer algumas perguntas para entender melhor o que você procura.');
+  questionsSection.classList.remove('hidden');
+  showQuestion(currentQuestion);
+});
+
+document.querySelectorAll('.option-btn').forEach(button => {
+  button.addEventListener('click', (e) => handleAnswer(e.target));
+});
+
+percentageSlider.addEventListener('input', (e) => {
+  percentageValue.textContent = `${e.target.value}%`;
+  updateResults();
+});
+
+restartButton.addEventListener('click', restartQuestionnaire);
+
+// Initialize catalog and mobile menu
+initializeMobileMenu();
+displayCatalog();
+
+// Functions
+async function showQuestion(questionId) {
+  const questions = {
+      occasion: 'Qual a ocasião?',
+      type: 'Que tipo de joia você procura?',
+      material: 'Qual material você prefere?',
+      stone: 'Gostaria de alguma pedra específica?',
+      style: 'Qual estilo você procura?',
+      budget: 'Qual seu orçamento?'
+  };
+
+  document.querySelectorAll('.question').forEach(q => q.classList.add('hidden'));
+  await addMessage(questions[questionId]);
+  document.querySelector(`[data-question="${questionId}"]`).classList.remove('hidden');
+}
+
+async function handleAnswer(button) {
+  // Update selection visual feedback
+  button.parentElement.querySelectorAll('.option-btn').forEach(btn => {
+      btn.classList.remove('selected');
+  });
+  button.classList.add('selected');
+
+  // Store answer and show as user message
+  const answer = button.textContent;
+  await addMessage(answer, false, 500);
+  
+  userPreferences[currentQuestion] = button.dataset.value;
+
+  // Move to next question or show results
+  const questions = ['occasion', 'type', 'material', 'stone', 'style', 'budget'];
+  const currentIndex = questions.indexOf(currentQuestion);
+
+  if (currentIndex < questions.length - 1) {
+      currentQuestion = questions[currentIndex + 1];
+      setTimeout(() => showQuestion(currentQuestion), 1000);
+  } else {
+      await addMessage('Ótimo! Agora vou procurar as joias que melhor combinam com suas preferências.');
+      showMatchPercentage();
+  }
+}
+
+function showMatchPercentage() {
+  questionsSection.classList.add('hidden');
+  matchPercentageSection.classList.remove('hidden');
+  resultsSection.classList.remove('hidden');
+  updateResults();
+}
